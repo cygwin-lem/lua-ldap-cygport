@@ -1,0 +1,29 @@
+inherit lua
+
+DESCRIPTION="Lua LDAP interface library"
+HOMEPAGE="http://www.keplerproject.org/lualdap/"
+SRC_URI="http://luaforge.net/frs/download.php/2998/${PN/-}-${PV}.tar.gz"
+SRC_DIR="${PN/-}-${PV}"
+
+src_compile() {
+	lndirs
+	cd ${B}
+	cygmake \
+		LIB_OPTION="-shared -Wl,--enable-auto-image-base" \
+		LUA_INC=${LUA_INCLUDEDIR} LUA_VERSION_NUM=${LUA_VERSION/./0} \
+		OPENLDAP_LIB="-lldap -llber ${LUA_LIBS}"
+}
+
+src_test() {
+	cd ${B}/src
+	${LUA} ../tests/test.lua directory.washington.edu "o=University of Washington,c=US"
+}
+
+src_install() {
+	cd ${B}
+	cyginstall \
+		LUA_VERSION_NUM=${LUA_VERSION/./0} \
+		LUA_DIR=${D}${LUA_SCRIPTDIR} LUA_LIBDIR=${D}${LUA_LIBDIR}
+}
+
+HTMLDOCS="doc/us/*"
