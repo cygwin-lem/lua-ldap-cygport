@@ -1,0 +1,49 @@
+inherit lua
+
+NAME="lua-ldap"
+VERSION=1.1.0
+RELEASE=2
+CATEGORY="Lua"
+SUMMARY="Lua OpenLDAP bindings"
+DESCRIPTION="LuaLDAP is a simple interface from Lua to an LDAP client, in
+fact it is a binding to OpenLDAP. It enables a Lua program to:
+* Connect to an LDAP server,
+* Execute any operation (search, add, compare, delete, modify and rename),
+* Retrieve entries and references of the search result."
+HOMEPAGE="http://www.keplerproject.org/lualdap/"
+SRC_URI="http://luaforge.net/frs/download.php/2998/lualdap-${VERSION}.tar.gz"
+SRC_DIR="lualdap-${VERSION}"
+PATCH_URI="
+	fedora/destdir.patch
+	fedora/lua52.patch
+	fedora/fix-attempt-to-concatenate-a-nil-value.patch
+	fedora/0001-update-test.lua-for-5.2.patch
+	fedora/0002-script-to-run-test.lua-against-a-dummy-slapd.patch
+"
+
+src_compile() {
+	lndirs
+	cd ${B}
+	cygmake \
+		CC=${CC} CFLAGS="${CFLAGS} -DLDAP_DEPRECATED -DLUA_COMPAT_ALL" \
+		LIBNAME="\$T.dll" \
+		LUA_INC=${LUA_INCLUDEDIR} LUA_VERSION_NUM=${LUA_VERSION/./0} \
+		OPENLDAP_LIB="-lldap -llber ${LUA_LIBS}"
+}
+
+src_test() {
+	cd ${B}
+	PATH="/usr/sbin:$PATH" \
+	LUA_CPATH="src/lualdap.dll" bash tests/run-tests.sh
+}
+
+src_install() {
+	cd ${B}
+	cyginstall \
+		LIBNAME="\$T.dll" \
+		LUA_VERSION_NUM=${LUA_VERSION/./0} \
+		LUA_DIR=${LUA_SCRIPTDIR} LUA_LIBDIR=${LUA_LIBDIR}
+	rm ${D}${LUA_LIBDIR}/*.so
+}
+
+HTMLDOCS="doc/us/*"
