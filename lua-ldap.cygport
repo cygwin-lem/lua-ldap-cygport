@@ -2,7 +2,7 @@ inherit lua
 
 NAME="lua-ldap"
 VERSION=1.1.0
-RELEASE=2
+RELEASE=3
 CATEGORY="Lua"
 SUMMARY="Lua OpenLDAP bindings"
 DESCRIPTION="LuaLDAP is a simple interface from Lua to an LDAP client, in
@@ -25,9 +25,9 @@ src_compile() {
 	lndirs
 	cd ${B}
 	cygmake \
-		CC=${CC} CFLAGS="${CFLAGS} -DLDAP_DEPRECATED -DLUA_COMPAT_ALL" \
+		CC=${CC} CFLAGS="${CFLAGS} -DLDAP_DEPRECATED" \
 		LIBNAME="\$T.dll" \
-		LUA_INC=${LUA_INCLUDEDIR} LUA_VERSION_NUM=${LUA_VERSION/./0} \
+		LUA_INC=${LUA_INCLUDEDIR} LUA_VERSION_NUM= \
 		OPENLDAP_LIB="-lldap -llber ${LUA_LIBS}"
 }
 
