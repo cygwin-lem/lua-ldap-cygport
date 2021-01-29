@@ -11,14 +11,14 @@ fact it is a binding to OpenLDAP. It enables a Lua program to:
 * Execute any operation (search, add, compare, delete, modify and rename),
 * Retrieve entries and references of the search result."
 HOMEPAGE="http://www.keplerproject.org/lualdap/"
-SRC_URI="http://luaforge.net/frs/download.php/2998/lualdap-${VERSION}.tar.gz"
-SRC_DIR="lualdap-${VERSION}"
+SRC_URI="https://github.com/lualdap/lualdap/archive/v${VERSION//\./_}/lualdap-${VERSION}.tar.gz"
+SRC_DIR="lualdap-${VERSION//\./_}/lualdap"
 PATCH_URI="
-	fedora/destdir.patch
-	fedora/lua52.patch
-	fedora/fix-attempt-to-concatenate-a-nil-value.patch
-	fedora/0001-update-test.lua-for-5.2.patch
-	fedora/0002-script-to-run-test.lua-against-a-dummy-slapd.patch
+	https://src.fedoraproject.org/rpms/lua-ldap/raw/f30/f/destdir.patch
+	https://src.fedoraproject.org/rpms/lua-ldap/raw/f30/f/lua52.patch
+	https://src.fedoraproject.org/rpms/lua-ldap/raw/f30/f/fix-attempt-to-concatenate-a-nil-value.patch
+	https://src.fedoraproject.org/rpms/lua-ldap/raw/f30/f/0001-update-test.lua-for-5.2.patch
+	https://src.fedoraproject.org/rpms/lua-ldap/raw/f30/f/0002-script-to-run-test.lua-against-a-dummy-slapd.patch
 "
 
 src_compile() {
