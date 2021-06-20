@@ -1,0 +1,13 @@
+--- origsrc/lualdap-1.3.0/Makefile	2021-06-05 22:49:42.000000000 +0900
++++ src/lualdap-1.3.0/Makefile
+@@ -9,8 +9,8 @@ SLAPD := openshift
+ 
+ CFLAGS_WARN := -pedantic -Wall -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings
+ 
+-override CPPFLAGS := -DLUA_C89_NUMBERS $(CPPFLAGS)
+-override CFLAGS := -O2 -fPIC -std=c89 $(CFLAGS_WARN) $(CFLAGS)
++override CPPFLAGS := $(CPPFLAGS)
++override CFLAGS := -O2 -fPIC $(CFLAGS_WARN) $(CFLAGS)
+ 
+ ifdef BUILD_VARIANT
+ REPORT_DIR := test-reports/$(BUILD_VARIANT)

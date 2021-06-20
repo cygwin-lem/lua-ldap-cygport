@@ -1,49 +1,83 @@
 inherit lua
 
 NAME="lua-ldap"
-VERSION=1.1.0
-RELEASE=3
+VERSION=1.3.0
+RELEASE=1
 CATEGORY="Lua"
 SUMMARY="Lua OpenLDAP bindings"
-DESCRIPTION="LuaLDAP is a simple interface from Lua to an LDAP client, in
+DESCRIPTION="\
+LuaLDAP is a simple interface from Lua to an LDAP client, in
 fact it is a binding to OpenLDAP. It enables a Lua program to:
 * Connect to an LDAP server,
 * Execute any operation (search, add, compare, delete, modify and rename),
-* Retrieve entries and references of the search result."
-HOMEPAGE="http://www.keplerproject.org/lualdap/"
-SRC_URI="https://github.com/lualdap/lualdap/archive/v${VERSION//\./_}/lualdap-${VERSION}.tar.gz"
-SRC_DIR="lualdap-${VERSION//\./_}/lualdap"
+* Retrieve entries and references of the search result.
+"
+HOMEPAGE="https://lualdap.github.io/lualdap/"
+
+GIT_REPO="https://github.com/lualdap/lualdap"
+declare -A GIT_DATEHASH_BY_NAME=(
+  # git log --date=iso-strict --format='%cd/%H' -1
+  [1.3.0]=2021-06-05T15:49:42+02:00/v1.3.0
+)
+REV_HASH="${GIT_DATEHASH_BY_NAME[${VERSION}]#*/}"
+REV_DATE="${GIT_DATEHASH_BY_NAME[${VERSION}]%%/*}"
+REV_DATE_SHORT="${REV_DATE%%T*}"
+GIT_BASENAME="${GIT_REPO##*/}"
+SRC_URI="${GIT_REPO}/archive/${REV_HASH}/${GIT_BASENAME}-${VERSION}.tar.gz"
+SRC_DIR="${GIT_BASENAME}-${REV_HASH#v}"
+
 PATCH_URI="
-	https://src.fedoraproject.org/rpms/lua-ldap/raw/f30/f/destdir.patch
-	https://src.fedoraproject.org/rpms/lua-ldap/raw/f30/f/lua52.patch
-	https://src.fedoraproject.org/rpms/lua-ldap/raw/f30/f/fix-attempt-to-concatenate-a-nil-value.patch
-	https://src.fedoraproject.org/rpms/lua-ldap/raw/f30/f/0001-update-test.lua-for-5.2.patch
-	https://src.fedoraproject.org/rpms/lua-ldap/raw/f30/f/0002-script-to-run-test.lua-against-a-dummy-slapd.patch
+  1.3.0-Makefile-cygwin.patch
+  1.3.0-busted-cygwin.patch
 "
 
-src_compile() {
-	lndirs
-	cd ${B}
-	cygmake \
-		CC=${CC} CFLAGS="${CFLAGS} -DLDAP_DEPRECATED" \
-		LIBNAME="\$T.dll" \
-		LUA_INC=${LUA_INCLUDEDIR} LUA_VERSION_NUM= \
-		OPENLDAP_LIB="-lldap -llber ${LUA_LIBS}"
+BUILD_REQUIRES="\
+  lua\
+  liblua-devel\
+  openldap-devel\
+"
+
+__set_LUA_MAKE_ARGS() {
+  LUA_MAKE_ARGS=(
+    DESTDIR=${D} \
+    CC=${CC} \
+    CFLAGS="${CFLAGS}" \
+    LUA=${LUA} \
+    LUA_LIB="${LUA_LIBS}" \
+  )
 }
 
-src_test() {
-	cd ${B}
-	PATH="/usr/sbin:$PATH" \
-	LUA_CPATH="src/lualdap.dll" bash tests/run-tests.sh
+src_compile() {
+  __set_LUA_MAKE_ARGS
+  cd ${B}
+
+  lndirs ${S} .
+  cygmake "${LUA_MAKE_ARGS[@]}"
 }
 
 src_install() {
-	cd ${B}
-	cyginstall \
-		LIBNAME="\$T.dll" \
-		LUA_VERSION_NUM=${LUA_VERSION/./0} \
-		LUA_DIR=${LUA_SCRIPTDIR} LUA_LIBDIR=${LUA_LIBDIR}
-	rm ${D}${LUA_LIBDIR}/*.so
+  __set_LUA_MAKE_ARGS
+  cd ${B}
+
+  cyginstall "${LUA_MAKE_ARGS[@]}"
+
+  dodoc C*.md R*.md docs/ rockspec/lualdap-${VERSION%p*}-*.rockspec
 }
 
-HTMLDOCS="doc/us/*"
+src_test() {
+  __set_LUA_MAKE_ARGS
+  cd ${B}
+
+  cygmake "${LUA_MAKE_ARGS[@]}" smoke
+
+  # The following test needs an LDAP server and 'busted',
+  # cf. sections 'setup a LDAP server' and 'tests/test.lua' in 'TESTING.md'.
+  # After setup is done with a docker image 'openshift/openldap-2441-centos7',
+  # try
+  #     SLAPD=openshift cygport lua-ldap.cygport test
+  # and see whether it goes well.
+  if [ x"${SLAPD}" = x"openshift" ]; then
+    ./tests/openshift/setup.sh || : # Ignore error
+    cygmake "${LUA_MAKE_ARGS[@]}" check
+  fi
+}

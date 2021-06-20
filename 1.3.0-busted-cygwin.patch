@@ -1,0 +1,28 @@
+--- origsrc/lualdap-1.3.0/Makefile	2021-06-05 22:49:42.000000000 +0900
++++ src/lualdap-1.3.0/Makefile
+@@ -54,10 +54,11 @@ setup_slapd:
+ 	./tests/$(SLAPD)/setup.sh
+ 
+ check:
+-	. tests/$(SLAPD)/test.env && LUA_CPATH="./src/?.so" busted tests/test.lua
++	@echo CHECK with $(LUA) and $(BUSTED)
++	. tests/$(SLAPD)/test.env && LUA_CPATH="./src/?.so;$(shell $(LUA) -e 'print(package.cpath)')" $(BUSTED) tests/test.lua
+ 
+ coverage: $(REPORT_DIR)
+-	. tests/$(SLAPD)/test.env && LUA_CPATH="./src/?.so" busted --coverage --output=junit -Xoutput $(REPORT_DIR)/report.xml tests/test.lua
++	. tests/$(SLAPD)/test.env && LUA_CPATH="./src/?.so;$(shell $(LUA) -e 'print(package.cpath)')" $(BUSTED) --coverage --output=junit -Xoutput $(REPORT_DIR)/report.xml tests/test.lua
+ 	luacov
+ 	mv luacov.*.out $(REPORT_DIR)
+ 
+--- origsrc/lualdap-1.3.0/config	2021-06-05 22:49:42.000000000 +0900
++++ src/lualdap-1.3.0/config
+@@ -19,6 +19,9 @@ INST_LIBDIR = /usr/lib/lua/$(LUA_VERSION
+ # Lua source module directory
+ INST_LUADIR = /usr/share/lua/$(LUA_VERSION)
+ 
++# busted executable
++BUSTED := busted
++
+ # OpenLDAP library (an optional directory can be specified with -L<dir>)
+ LDAP_LIB = -lldap
+ # System's libraries directory (where binary libraries are installed)
