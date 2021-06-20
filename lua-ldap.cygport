@@ -1,6 +1,6 @@
 NAME="lua-ldap"
 VERSION=1.3.0
-RELEASE=1
+RELEASE=10
 CATEGORY="Lua"
 SUMMARY="Lua OpenLDAP bindings"
 DESCRIPTION="\
