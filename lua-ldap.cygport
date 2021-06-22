@@ -25,7 +25,7 @@ SRC_URI="${GIT_REPO}/archive/${REV_HASH}/${GIT_BASENAME}-${VERSION}.tar.gz"
 SRC_DIR="${GIT_BASENAME}-${REV_HASH#v}"
 
 ################################
-LUA_VERSIONS="5.3:5.4"
+LUA_VERSIONS="5.1:5.2:5.3:5.4"
 LUA_PKG_NAME="${NAME#lua-}"
 source lua.experiment
 
@@ -47,12 +47,16 @@ PATCH_URI+="
 ## Requirements for building
 ################################
 BUILD_REQUIRES="\
+  lua51-devel\
+  lua52-devel\
   lua53-devel\
   lua54-devel\
 \
   openldap-devel\
 "
 # TEST_REQUIRES="\
+#   lua51-busted \
+#   lua52-busted \
 #   lua53-busted \
 #   lua54-busted \
 # "
